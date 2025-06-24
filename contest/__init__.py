@@ -40,9 +40,9 @@ class Group(BaseGroup):
         total = sum(player.tickets_purchased for player in self.get_players())
         for player in self.get_players():
             try:
-            player.prize_won = player.tickets_purchased / total
+                player.prize_won = player.tickets_purchased / total
             except ZeroDivisionError:
-                player.prize_won = 1/ len(player.tickets_purchased)
+                player.prize_won = 1/ len(self.get_players())
             player.earnings = (
                 player.endowment -
                 player.tickets_purchased * player.cost_per_ticket +
