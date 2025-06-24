@@ -23,6 +23,10 @@ class Subsession(BaseSubsession):
         for group in self.get_groups():
             group.setup_round()
 
+    def compute_outcome(self):
+        for group in self.get_groups():
+            group.compute_outcome()
+
 
 class Group(BaseGroup):
     prize = models.CurrencyField()
@@ -32,11 +36,26 @@ class Group(BaseGroup):
         for player in self.get_players():
             player.setup_round()
 
+    def compute_outcome(self):
+        total = sum(player.tickets_purchased for player in self.get_players())
+        for player in self.get_players():
+            try:
+            player.prize_won = player.tickets_purchased / total
+            except ZeroDivisionError:
+                player.prize_won = 1/ len(player.tickets_purchased)
+            player.earnings = (
+                player.endowment -
+                player.tickets_purchased * player.cost_per_ticket +
+                self.prize * player.prize_won
+            )
+
 
 class Player(BasePlayer):
     endowment = models.CurrencyField()
     cost_per_ticket = models.CurrencyField()
     tickets_purchased = models.IntegerField()
+    prize_won = models.FloatField()
+    earnings = models.CurrencyField()
 
     def setup_round(self):
         self.endowment = C.ENDOWMENT
@@ -66,7 +85,11 @@ class Decision(Page):
 
 
 class DecisionWaitPage(WaitPage):
-    pass
+    wait_for_all_groups = True
+
+    @staticmethod
+    def after_all_players_arrive(subsession):
+        subsession.compute_outcome()
 
 
 class Results(Page):
