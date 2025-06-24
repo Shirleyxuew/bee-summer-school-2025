@@ -36,11 +36,15 @@ class Group(BaseGroup):
 class Player(BasePlayer):
     endowment = models.CurrencyField()
     cost_per_ticket = models.CurrencyField()
-    ticket_purchased = models.IntegerField()
+    tickets_purchased = models.IntegerField()
 
     def setup_round(self):
         self.endowment = C.ENDOWMENT
         self.cost_per_ticket = C.COST_PER_TICKET
+
+    @property
+    def coplayer(self):
+        return self.group.get_player_by_id(3 - self.id_in_group)
 
 
 # PAGES
@@ -58,7 +62,7 @@ class Intro(Page):
 
 class Decision(Page):
     form_model = "player"
-    form_fields = ["ticket_purchased"]
+    form_fields = ["tickets_purchased"]
 
 
 class DecisionWaitPage(WaitPage):
