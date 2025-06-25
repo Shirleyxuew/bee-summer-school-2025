@@ -1,4 +1,6 @@
+import random
 import string
+import time
 
 from otree.api import *
 from otree.models import player, subsession
@@ -12,17 +14,28 @@ class C(BaseConstants):
     NAME_IN_URL = 'encryption'
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 3
-
+    LOOKUP_TABLES = [
+        "ABC",
+        "CBA",
+        "CAB"
+    ]
+    TIME_FOR_TASK = 40
 
 class Subsession(BaseSubsession):
     payment_per_correct = models.CurrencyField()
     word = models.StringField()
     lookup_table = models.StringField()
+    time_for_task = models.FloatField()
+    random_seed = models.IntegerField()
 
     def setup_round(self):
+        if self.round_number == 1:
+            self.random_seed = self.session.config.get("random_seed",12345678)
+            random.seed(self.random_seed)
         self.payment_per_correct = Currency(0.10)
-        self.word = "AB"
-        self.lookup_table = string.ascii_uppercase
+        self.lookup_table = C.LOOKUP_TABLES[(self.round_number - 1) % 3]
+        self.time_for_task = C.TIME_FOR_TASK
+        self.word = "".join(random.choices(string.ascii_uppercase, k=5))
 
     @property
     def lookup_dict(self):
@@ -40,18 +53,32 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    started_task_at = models.FloatField()
     response_1 = models.IntegerField()
     response_2 = models.IntegerField()
     is_correct = models.BooleanField()
+
+    @property
+    def response_fields(self):
+        return ["response_1", "response_2"]
 
     @property
     def response(self):
         return [self.response_1, self.response_2]
 
     def check_response(self):
-        self.is_correct == self.response == self.correct_response
+        self.is_correct == self.response == self.subsession.correct_response
         if self.is_correct:
             self.payoff = self.subsession.payment_per_correct
+
+    def start_task(self):
+        self.started_task_at = time.time()
+
+    def get_time_elapsed(self):
+        return time.time() - self.in_round(1).started_task_at
+
+    def get_time_remaining(self):
+        return self.subsession.in_round(1).time_for_task - self.get_time_elapsed()
 
 
 def creating_session(subsession):
@@ -64,10 +91,20 @@ class Intro(Page):
     def is_displayed(self):
         return self.round_number == 1
 
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.start_task()
 
 class Decision(Page):
     form_model = "player"
-    form_fields = ["response_1", "response_2"]
+
+    @staticmethod
+    def get_form_fields(player):
+        return player.get_time_remaining()
+
+    @staticmethod
+    def get_form_fields(player):
+        return player.response_fields
 
     @staticmethod
     def before_next_page(player, timeout_happened):
