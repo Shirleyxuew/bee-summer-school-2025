@@ -15,9 +15,9 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 3
     LOOKUP_TABLES = [
-        "ABC",
-        "CBA",
-        "CAB"
+        "ZYXJIUTLKQSRNWVHGFEDMOPCBA",
+        "ZYXWVUTSRQPONMLKJIHGFEDCBA",
+        "BADCFEHGJILKNMPORQTSVUXWZY",
     ]
     TIME_FOR_TASK = 40
 
@@ -56,15 +56,18 @@ class Player(BasePlayer):
     started_task_at = models.FloatField()
     response_1 = models.IntegerField()
     response_2 = models.IntegerField()
+    response_3 = models.IntegerField()
+    response_4 = models.IntegerField()
+    response_5 = models.IntegerField()
     is_correct = models.BooleanField()
 
     @property
     def response_fields(self):
-        return ["response_1", "response_2"]
+        return ["response_1", "response_2", "response_3", "response_4", "response_5"]
 
     @property
     def response(self):
-        return [self.response_1, self.response_2]
+        return [self.response_1, self.response_2, self.response_3, self.response_4, self.response_5]
 
     def check_response(self):
         self.is_correct == self.response == self.subsession.correct_response
