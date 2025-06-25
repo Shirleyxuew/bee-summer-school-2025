@@ -22,6 +22,24 @@ dict(
         ],
         num_demo_participants=2,
     ),
+dict(
+        name="contest_share",
+        app_sequence=[
+            "contest"
+        ],
+        num_demo_participants=2,
+        contest_csf="share",
+        contest_endowment=9,
+    ),
+dict(
+        name="contest_allpay",
+        app_sequence=[
+            "contest"
+        ],
+        num_demo_participants=2,
+        contest_csf="allpay",
+
+    ),
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
