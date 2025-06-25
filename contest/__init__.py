@@ -1,3 +1,5 @@
+import random
+
 from otree.api import *
 from otree.database import StringField
 
@@ -10,20 +12,27 @@ class C(BaseConstants):
     NAME_IN_URL = 'contest'
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 2
+    NUM_PAID_ROUNDS = 1
     ENDOWMENT = Currency(10)
     COST_PER_TICKET = Currency(1)
     PRIZE = Currency(10)
 
 
 class Subsession(BaseSubsession):
-    is_paid = models.BooleanField()
-    csf = models.StringField(choices = ["share","allpay"])
+    is_paid = models.BooleanField(initial=False)
+    csf = models.StringField(choices = ["share","allpay", "lottery"])
 
     def setup_round(self):
-        self.is_paid = self.round_number % 2 == 1
+        if self.round_number == 1:
+            self.setup_paid_rounds()
         self.csf = self.session.config["contest_csf"]
         for group in self.get_groups():
             group.setup_round()
+
+    def setup_paid_rounds(self):
+        for rd in random.sample(self.in_rounds(1,C.NUM_ROUNDS),
+                                k=C.NUM_ROUNDS):
+            rd.is_paid = True
 
     def compute_outcome(self):
         for group in self.get_groups():
@@ -37,6 +46,15 @@ class Group(BaseGroup):
         self.prize = C.PRIZE
         for player in self.get_players():
             player.setup_round()
+
+    def compute_outcome_lottery(self):
+        try:
+            winner = random.choices(self.get_players(), k=1,
+                                weights=[p.tickets_purchase for p in self.get_players()])[0] #first element in the list
+        except ValueError:
+            winner = random.choice(self.get_players())
+        for player in self.get_players():
+            player.prize_won = 1 if player == winner else 0
 
     def compute_outcome_share(self):
         total = sum(player.tickets_purchased for player in self.get_players())
