@@ -26,6 +26,8 @@ class Subsession(BaseSubsession):
         if self.round_number == 1:
             self.setup_paid_rounds()
         self.csf = self.session.config["contest_csf"]
+        if self.session.config.get("contest_group_randomly", False):
+            self.group_randomly()
         for group in self.get_groups():
             group.setup_round()
 
