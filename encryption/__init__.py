@@ -1,3 +1,5 @@
+import string
+
 from otree.api import *
 from otree.models import player, subsession
 
@@ -13,22 +15,46 @@ class C(BaseConstants):
 
 
 class Subsession(BaseSubsession):
-    payment_per_correct = models.CurrencyField
+    payment_per_correct = models.CurrencyField()
     word = models.StringField()
+    lookup_table = models.StringField()
 
     def setup_round(self):
         self.payment_per_correct = Currency(0.10)
         self.word = "AB"
+        self.lookup_table = string.ascii_uppercase
 
+    @property
+    def lookup_dict(self):
+        lookup = {}
+        for letter in string.ascii_uppercase:
+            lookup[letter] = self.lookup_table.index(letter)
+        return lookup
+
+    @property
+    def correct_response(self):
+        return [self.lookup_dict[letter] for letter in self.word]
 
 class Group(BaseGroup):
     pass
 
 
 class Player(BasePlayer):
-    pass
+    response_1 = models.IntegerField()
+    response_2 = models.IntegerField()
+    is_correct = models.BooleanField()
 
-def creating_session(submission):
+    @property
+    def response(self):
+        return [self.response_1, self.response_2]
+
+    def check_response(self):
+        self.is_correct == self.response == self.correct_response
+        if self.is_correct:
+            self.payoff = self.subsession.payment_per_correct
+
+
+def creating_session(subsession):
     subsession.setup_round()
     #initialize at the beginning of the session
 
@@ -36,11 +62,16 @@ def creating_session(submission):
 class Intro(Page):
     @staticmethod
     def is_displayed(self):
-        return player.round_number == 1
+        return self.round_number == 1
 
 
-class Decision(WaitPage):
-    pass
+class Decision(Page):
+    form_model = "player"
+    form_fields = ["response_1", "response_2"]
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.check_response()
 
 
 class Results(Page):
