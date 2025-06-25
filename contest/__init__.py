@@ -90,6 +90,9 @@ class Player(BasePlayer):
     def max_tickets_affordable(self):
         return  int(self.endowment / self.cost_per_ticket)
 
+    def in_paid_rounds(self):
+        return [rd for rd in self.in_rounds() if rd.subsession.is_paid]
+
 
 # PAGES
 class SetupRound(WaitPage):
@@ -101,7 +104,8 @@ class SetupRound(WaitPage):
 
 
 class Intro(Page):
-    pass
+    def is_displayed(player):
+        return player.round_number == 1
 
 
 class Decision(Page):
@@ -134,7 +138,9 @@ class Results(Page):
 
 
 class EndBlock(Page):
-    pass
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == C.NUM_ROUNDS
 
 
 page_sequence = [
