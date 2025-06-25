@@ -19,7 +19,7 @@ class Subsession(BaseSubsession):
     is_paid = models.BooleanField()
 
     def setup_round(self):
-        self.is_paid = True
+        self.is_paid = self.round_number % 2 == 1
         for group in self.get_groups():
             group.setup_round()
 
@@ -48,6 +48,8 @@ class Group(BaseGroup):
                 player.tickets_purchased * player.cost_per_ticket +
                 self.prize * player.prize_won
             )
+            if self.subsession.is_paid:
+                player.payoff = player.earnings
 
 
 class Player(BasePlayer):
