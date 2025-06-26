@@ -1,9 +1,20 @@
 {{ block title }}
     Word to encrypt
 {{ endblock }}
+
+{{ block styles }}
+<style>
+    .word {
+        color: dodgerblue;
+        font-size: 2.5rem;
+        font-family: "Berlin Sans FB";
+    }
+</style>
+{{ endblock }}
+
 {{ block content }}
 
-<table>
+<table class="table">
     <thead>
         <tr class="fw-bold text-center">
             {{ for letter in subsession.lookup_dict.keys}}
@@ -20,9 +31,18 @@
     </tbody>
 </table>
 
-The word is {{ subsession.word }}
+<div class="row">
+    <div class="col-12 text-center word">{{ subsession.word }}</div>
+</div>
 
-    {{ formfields }}
+<div class="row justify-content-center">
+{{ for field in player.response_fields }}
+    <div class="col-1">
+<input type="number" class="form-control" inputmode="numeric"
+       id="id_field" min="0" name="field" required value="">
+        </div>
+{{ endfor }}
+</div>
     {{ next_button }}
 
 {{ endblock }}
