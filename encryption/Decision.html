@@ -3,7 +3,22 @@
 {{ endblock }}
 {{ block content }}
 
-The table is {{ subsession.lookup_dict }}
+<table>
+    <thead>
+        <tr class="fw-bold text-center">
+            {{ for letter in subsession.lookup_dict.keys}}
+            <td>{{ letter }}</td>
+            {{ endfor }}
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="text-center">
+            {{ for value in subsession.lookup_dict.values}}
+            <td>{{ value }}</td>
+            {{ endfor }}
+        </tr>
+    </tbody>
+</table>
 
 The word is {{ subsession.word }}
 
