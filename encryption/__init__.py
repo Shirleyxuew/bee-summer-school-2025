@@ -83,6 +83,9 @@ class Player(BasePlayer):
     def get_time_remaining(self):
         return self.subsession.in_round(1).time_for_task - self.get_time_elapsed()
 
+    @property
+    def total_payoff(self):
+        return sum(p.payoff for p in self.in_all_rounds())
 
 def creating_session(subsession):
     subsession.setup_round()
@@ -118,6 +121,10 @@ class Results(Page):
     @staticmethod
     def is_displayed(self):
         return self.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.participant.vars["earning_encryption"] = player.total_payoff
 
 
 page_sequence = [Intro,
