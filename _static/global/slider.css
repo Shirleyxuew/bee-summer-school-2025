@@ -1,0 +1,4 @@
+.range-hidden-slider::-webkit-slider-thumb {
+    /* For Chrome, Safari, Edge Chromium*/
+    opacity: 0;
+}
