@@ -19,7 +19,7 @@ class C(BaseConstants):
         "ZYXWVUTSRQPONMLKJIHGFEDCBA",
         "BADCFEHGJILKNMPORQTSVUXWZY",
     ]
-    TIME_FOR_TASK = 40
+    TIME_FOR_TASK = 400
 
 class Subsession(BaseSubsession):
     payment_per_correct = models.CurrencyField()
@@ -70,7 +70,7 @@ class Player(BasePlayer):
         return [self.response_1, self.response_2, self.response_3, self.response_4, self.response_5]
 
     def check_response(self):
-        self.is_correct == self.response == self.subsession.correct_response
+        self.is_correct = self.response == self.subsession.correct_response
         if self.is_correct:
             self.payoff = self.subsession.payment_per_correct
 
@@ -105,7 +105,7 @@ class Decision(Page):
     form_model = "player"
 
     @staticmethod
-    def get_form_fields(player):
+    def get_timeout_seconds(player):
         return player.get_time_remaining()
 
     @staticmethod
