@@ -66,8 +66,8 @@ dict(
 dict(
         name="Full_experiment",
         app_sequence=[
-            "contest"
-            "encryption"
+            "contest",
+            "encryption",
             "summary"
         ],
         num_demo_participants=2,

@@ -33,9 +33,12 @@ class Player(BasePlayer):
 class CollectResults(WaitPage):
     wait_for_all_groups = True
 
+    @staticmethod
+    def after_all_players_arrive(subsession):
+        subsession.collect_results()
 
 class Summary(Page):
     pass
 
 
-page_sequence = [MyPage, ResultsWaitPage, Results]
+page_sequence = [CollectResults, Summary]
